@@ -1,0 +1,1842 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FitQuest - Your Fitness Journey</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                            accent: '#f43f5e',
+                            accentHover: '#e11d48',
+                            gold: '#f59e0b'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- JS Confetti CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(229, 231, 235, 0.8);
+        }
+        .dark .glass-card {
+            background: rgba(15, 23, 42, 0.82);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(51, 65, 85, 0.6);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(156, 163, 175, 0.4);
+            border-radius: 9999px;
+        }
+        @keyframes pulse-subtle {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+        .animate-pulse-subtle {
+            animation: pulse-subtle 3s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen pb-12 transition-colors duration-300">
+
+    <!-- Top Navigation Bar -->
+    <header class="sticky top-0 z-40 w-full glass-card border-b border-slate-800 mb-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 via-rose-500 to-amber-500 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-emerald-500/20">
+                    <i class="fa-solid fa-bolt"></i>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-lg tracking-tight bg-gradient-to-r from-emerald-400 via-rose-400 to-amber-400 bg-clip-text text-transparent">FitQuest</h1>
+                    <p id="headerSubtitle" class="text-xs text-slate-400 font-medium">100kg to Hero • Meowwww's Edition</p>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-2 sm:space-x-3">
+                <!-- Language Switcher Toggle -->
+                <button id="langToggle" onclick="toggleLanguage()" class="px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 hover:bg-slate-700 transition font-bold text-xs flex items-center space-x-1.5">
+                    <i class="fa-solid fa-language text-emerald-400 text-sm"></i>
+                    <span id="langToggleText">中文</span>
+                </button>
+
+                <!-- Reset to Initial State Button -->
+                <button id="resetAllBtn" onclick="resetToInitialState()" class="px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-300 hover:bg-rose-500/20 hover:text-rose-400 hover:border-rose-500/40 transition font-bold text-xs flex items-center space-x-1.5" title="Reset to 100kg Initial State">
+                    <i class="fa-solid fa-arrow-rotate-left"></i>
+                    <span id="resetAllBtnText" class="hidden sm:inline">重置初始狀態</span>
+                </button>
+
+                <!-- Instant Love & Cheer Button -->
+                <button id="cheerBtn" onclick="triggerCheerAnimation()" class="relative group px-3 sm:px-4 py-2 rounded-xl bg-gradient-to-r from-rose-500 to-pink-600 text-white font-bold text-xs sm:text-sm hover:opacity-95 active:scale-95 transition-all shadow-lg shadow-rose-500/25 flex items-center space-x-2">
+                    <i class="fa-solid fa-heart animate-bounce text-white"></i>
+                    <span id="cheerBtnText">Cheer from Meowwww</span>
+                </button>
+
+                <!-- Theme Toggle -->
+                <button id="themeToggle" onclick="toggleTheme()" class="p-2.5 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 transition">
+                    <i id="themeIcon" class="fa-solid fa-sun text-amber-400"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+
+        <!-- Motivational Hero Banner -->
+        <section class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-850 to-emerald-950 text-white p-6 md:p-8 shadow-2xl border border-slate-800">
+            <div class="absolute -right-10 -bottom-10 w-72 h-72 bg-rose-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute right-1/3 -top-10 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+                <div class="md:col-span-2 space-y-3">
+                    <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-rose-500/20 border border-rose-500/30 text-rose-300 text-xs font-bold">
+                        <svg class="w-3.5 h-3.5 text-rose-400 fill-current" viewBox="0 0 24 24"><path d="M12 2c.5 4.5-3 7.5-3 11.5 0 2.5 2 4.5 4.5 4.5s4.5-2 4.5-4.5c0-2-1-3.5-2-4.5.5 1.5-.5 3-1.5 3-1 0-1.5-1-1.5-2.5 0-2 1.5-4.5-1-7.5zM8.5 13c-.8 1-1.5 2.2-1.5 3.5C7 19.5 9.5 22 12.5 22s5.5-2.5 5.5-5.5c0-1.5-.7-3-1.8-4.2.3 1 .3 2.2-.2 3.2-1 2-3.5 2.5-5.5 1.5-1.5-.8-2.3-2.3-2-4z"/></svg>
+                        <span id="heroBadgeText">YOU'RE MEOWWWW'S HERO — KEEP PUSHING!</span>
+                    </div>
+                    <h2 id="heroTitle" class="text-3xl sm:text-4xl font-black tracking-tight leading-tight">
+                        From 100 kg to <span class="bg-gradient-to-r from-emerald-400 via-teal-300 to-amber-300 bg-clip-text text-transparent">Peak Physique & Romance.</span>
+                    </h2>
+
+                    <!-- Dynamic Quote Card -->
+                    <div class="flex items-start space-x-3 bg-slate-900/80 backdrop-blur-md p-4 rounded-2xl border border-slate-700/60">
+                        <i class="fa-solid fa-quote-left text-rose-400 text-lg mt-0.5"></i>
+                        <div class="flex-1">
+                            <p id="quoteText" class="text-slate-200 font-medium italic text-sm md:text-base">"The journey from 100 kg isn't just about losing weight; it's about building your best self."</p>
+                            <span id="quoteAuthor" class="text-xs text-rose-400 font-bold block mt-1">— Meowwww ❤️</span>
+                        </div>
+                        <button onclick="newQuote()" title="New Motivational Quote" class="text-slate-400 hover:text-emerald-400 transition p-1">
+                            <i class="fa-solid fa-rotate text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Overall Journey Progress Summary -->
+                <div class="bg-slate-900/90 p-5 rounded-2xl border border-slate-700 text-center space-y-3 shadow-xl">
+                    <span id="overallProgressLabel" class="text-xs text-slate-400 uppercase font-black tracking-wider">Overall Quest Progress</span>
+                    <div class="flex justify-between items-baseline px-2">
+                        <span id="startWeightLabel" class="text-xs font-bold text-slate-400">Start: 100.0 kg</span>
+                        <span id="currentWeightDisplay" class="text-2xl font-black text-emerald-400">-- kg</span>
+                        <span id="targetWeightDisplay" class="text-xs font-bold text-slate-400">Target: 80.0 kg</span>
+                    </div>
+                    
+                    <!-- Progress Bar -->
+                    <div class="w-full bg-slate-800 rounded-full h-4 overflow-hidden p-0.5 border border-slate-700">
+                        <div id="heroProgressBar" class="bg-gradient-to-r from-emerald-500 via-teal-400 to-amber-400 h-full rounded-full transition-all duration-1000" style="width: 0%"></div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 pt-1 text-left">
+                        <div class="bg-slate-950/80 p-2.5 rounded-xl border border-slate-800">
+                            <div id="heroTotalLostLabel" class="text-[10px] text-slate-400 font-semibold uppercase">Total Shedded</div>
+                            <div id="heroTotalLost" class="text-base font-black text-white">0.0 kg</div>
+                        </div>
+                        <div class="bg-slate-950/80 p-2.5 rounded-xl border border-slate-800">
+                            <div id="heroPercentDoneLabel" class="text-[10px] text-slate-400 font-semibold uppercase">Goal Progress</div>
+                            <div id="heroPercentDone" class="text-base font-black text-amber-400">0%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dynamic Stat Metric Cards -->
+        <section class="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <div class="glass-card p-4 rounded-2xl flex items-center space-x-3 shadow-sm hover:border-emerald-500/50 transition">
+                <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-base font-bold border border-emerald-500/20 shrink-0">
+                    <i class="fa-solid fa-scale-balanced"></i>
+                </div>
+                <div class="min-w-0">
+                    <p id="statCurrentWeightLabel" class="text-xs text-slate-400 font-medium truncate">Current Scale</p>
+                    <h3 id="statCurrentWeight" class="text-base sm:text-lg font-black whitespace-nowrap">100.0 kg</h3>
+                </div>
+            </div>
+
+            <div class="glass-card p-4 rounded-2xl flex items-center space-x-3 shadow-sm hover:border-blue-500/50 transition">
+                <div class="w-10 h-10 rounded-2xl bg-blue-500/10 text-blue-400 flex items-center justify-center text-base font-bold border border-blue-500/20 shrink-0">
+                    <i class="fa-solid fa-trophy"></i>
+                </div>
+                <div class="min-w-0">
+                    <p id="statTotalLostLabel" class="text-xs text-slate-400 font-medium truncate">Total Shedded</p>
+                    <h3 id="statTotalLost" class="text-base sm:text-lg font-black whitespace-nowrap">0.0 kg</h3>
+                </div>
+            </div>
+
+            <div class="glass-card p-4 rounded-2xl flex items-center space-x-3 shadow-sm hover:border-rose-500/50 transition">
+                <div class="w-10 h-10 rounded-2xl bg-rose-500/10 text-rose-400 flex items-center justify-center text-base font-bold border border-rose-500/20 shrink-0">
+                    <!-- Reliable SVG Flame Icon -->
+                    <svg class="w-5 h-5 text-rose-500 fill-current" viewBox="0 0 24 24">
+                        <path d="M12.9 2.6c-.4-.5-1.2-.5-1.5.1-1.3 2.5-3.4 4.5-4.8 7-1.1 1.9-1.6 4.1-1.1 6.3.7 3.2 3.5 5.6 6.8 5.9 3.7.3 7-2.3 7.6-6 .4-2.4-.3-4.9-1.8-6.8-.4-.5-1.2-.4-1.4.2-.4 1.1-1.2 1.9-2.2 2.2-.3.1-.6-.2-.5-.5.5-2.9-.3-5.9-1.1-8.4z"/>
+                    </svg>
+                </div>
+                <div class="min-w-0">
+                    <p id="statStreakLabel" class="text-xs text-slate-400 font-medium truncate">Habit Streak</p>
+                    <h3 id="statStreak" class="text-base sm:text-lg font-black whitespace-nowrap">0 Days</h3>
+                </div>
+            </div>
+
+            <div class="glass-card p-4 rounded-2xl flex items-center space-x-3 shadow-sm hover:border-purple-500/50 transition">
+                <div class="w-10 h-10 rounded-2xl bg-purple-500/10 text-purple-400 flex items-center justify-center text-base font-bold border border-purple-500/20 shrink-0">
+                    <i class="fa-solid fa-coins"></i>
+                </div>
+                <div class="min-w-0">
+                    <p id="statPointsLabel" class="text-xs text-slate-400 font-medium truncate">Effort Points</p>
+                    <h3 id="statPoints" class="text-base sm:text-lg font-black text-purple-400 whitespace-nowrap">0 Pts</h3>
+                </div>
+            </div>
+
+            <div class="col-span-2 md:col-span-1 glass-card p-4 rounded-2xl flex items-center space-x-3 shadow-sm hover:border-amber-500/50 transition">
+                <div class="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center text-base font-bold border border-amber-500/20 shrink-0">
+                    <i class="fa-solid fa-flag-checkered"></i>
+                </div>
+                <div class="min-w-0">
+                    <p id="statRemainingLabel" class="text-xs text-slate-400 font-medium truncate">Remaining</p>
+                    <h3 id="statRemaining" class="text-base sm:text-lg font-black whitespace-nowrap">20.0 kg</h3>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Workspace -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- Left 2 Columns: Chart, Weight Logging, Rewards & Physical Gift Shop -->
+            <div class="lg:col-span-2 space-y-6">
+
+                <!-- Interactive Progress Chart -->
+                <div class="glass-card p-5 sm:p-6 rounded-3xl shadow-sm space-y-4">
+                    <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
+                        <div>
+                            <h3 class="text-lg font-bold flex items-center space-x-2">
+                                <i class="fa-solid fa-chart-line text-emerald-400"></i>
+                                <span id="chartTitle">Weight Loss Trajectory</span>
+                            </h3>
+                            <p id="chartSubtitle" class="text-xs text-slate-400">Tracking every step down from 100 kg!</p>
+                        </div>
+                        
+                        <div class="flex items-center space-x-2">
+                            <span id="targetGoalLabel" class="text-xs text-slate-400 font-medium">Target Goal:</span>
+                            <input type="number" id="targetGoalInput" min="50" max="100" value="80" onchange="updateTargetGoal(this.value)" class="w-16 px-2 py-1 rounded-xl border border-slate-700 bg-slate-900 text-sm font-bold text-center focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            <span class="text-xs font-semibold">kg</span>
+                        </div>
+                    </div>
+
+                    <div class="relative w-full h-72 sm:h-80">
+                        <canvas id="weightChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Log Weight Card -->
+                <div class="glass-card p-5 sm:p-6 rounded-3xl shadow-sm space-y-4">
+                    <h3 class="text-lg font-bold flex items-center space-x-2">
+                        <i class="fa-solid fa-pen-to-square text-amber-400"></i>
+                        <span id="logWeightTitle">Log Today's Weight</span>
+                    </h3>
+
+                    <form id="weightForm" onsubmit="handleWeightSubmit(event)" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                            <label id="entryDateLabel" class="block text-xs font-semibold text-slate-400 mb-1">Date</label>
+                            <input type="date" id="entryDate" required class="w-full px-3 py-2.5 rounded-xl border border-slate-700 bg-slate-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        </div>
+                        <div>
+                            <label id="entryWeightLabel" class="block text-xs font-semibold text-slate-400 mb-1">Weight (kg)</label>
+                            <input type="number" step="0.1" id="entryWeight" min="40" max="150" placeholder="e.g. 96.5" required class="w-full px-3 py-2.5 rounded-xl border border-slate-700 bg-slate-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        </div>
+                        <div class="flex items-end">
+                            <button type="submit" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:opacity-90 text-white font-bold text-sm shadow-lg shadow-emerald-500/20 active:scale-95 transition">
+                                <i class="fa-solid fa-plus mr-1"></i> <span id="addEntryBtnText">Add Entry</span>
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- History Table -->
+                    <div class="pt-4 border-t border-slate-800">
+                        <h4 id="recentLogsTitle" class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Recent Progress Logs</h4>
+                        <div class="max-h-48 overflow-y-auto custom-scrollbar pr-1">
+                            <table class="w-full text-left text-sm">
+                                <thead>
+                                    <tr class="text-xs text-slate-400 border-b border-slate-800">
+                                        <th id="thDate" class="pb-2 font-semibold">Date</th>
+                                        <th id="thWeight" class="pb-2 font-semibold">Weight</th>
+                                        <th id="thChange" class="pb-2 font-semibold">Change</th>
+                                        <th id="thAction" class="pb-2 font-semibold text-right">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="weightHistoryTable" class="divide-y divide-slate-800/60">
+                                    <!-- Dynamic Rows Loaded Here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Meowwww's Reward Vault & Privilege Coupons -->
+                <div class="glass-card p-5 sm:p-6 rounded-3xl shadow-sm space-y-4">
+                    <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+                        <div>
+                            <h3 class="text-lg font-bold flex items-center space-x-2">
+                                <i class="fa-solid fa-gift text-rose-400"></i>
+                                <span id="rewardVaultTitle">Meowwww's Reward Vault (Every -3kg!)</span>
+                            </h3>
+                            <p id="rewardVaultSubtitle" class="text-xs text-slate-400">Unlock special privilege coupons every 3kg lost & via Habit Streaks!</p>
+                        </div>
+                    </div>
+
+                    <!-- Filter Tabs: Weight vs Streak -->
+                    <div class="flex space-x-2 border-b border-slate-800 pb-3">
+                        <button id="tabWeightBtn" onclick="switchRewardTab('weight')" class="px-4 py-1.5 rounded-xl text-xs font-bold bg-rose-500 text-white shadow-md transition flex items-center space-x-1.5">
+                            <i class="fa-solid fa-weight-scale"></i>
+                            <span id="tabWeightText">Every -3kg Milestones</span>
+                        </button>
+                        <button id="tabStreakBtn" onclick="switchRewardTab('streak')" class="px-4 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-400 hover:text-white transition flex items-center space-x-1.5">
+                            <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12.9 2.6c-.4-.5-1.2-.5-1.5.1-1.3 2.5-3.4 4.5-4.8 7-1.1 1.9-1.6 4.1-1.1 6.3.7 3.2 3.5 5.6 6.8 5.9 3.7.3 7-2.3 7.6-6 .4-2.4-.3-4.9-1.8-6.8-.4-.5-1.2-.4-1.4.2-.4 1.1-1.2 1.9-2.2 2.2-.3.1-.6-.2-.5-.5.5-2.9-.3-5.9-1.1-8.4z"/></svg>
+                            <span id="tabStreakText">Habit Streak Power-ups</span>
+                        </button>
+                    </div>
+
+                    <div id="milestonesGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+                        <!-- Dynamic High-Value Reward Cards Loaded Here -->
+                    </div>
+                </div>
+
+                <!-- Physical Gift Shop (Redeem with Effort Points) -->
+                <div class="glass-card p-5 sm:p-6 rounded-3xl shadow-sm space-y-4 border-t-4 border-t-purple-500">
+                    <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+                        <div>
+                            <h3 class="text-lg font-bold flex items-center space-x-2">
+                                <i class="fa-solid fa-bag-shopping text-purple-400"></i>
+                                <span id="giftShopTitle">Physical Gift Shop</span>
+                            </h3>
+                            <p id="giftShopSubtitle" class="text-xs text-slate-400">Complete daily habits & check in to earn points for real physical gifts from Meowwww!</p>
+                        </div>
+                        <div class="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-2xl bg-purple-500/15 border border-purple-500/30 text-purple-300 font-black text-xs">
+                            <i class="fa-solid fa-coins text-amber-400"></i>
+                            <span id="shopPointsBalance">0 Pts</span>
+                        </div>
+                    </div>
+
+                    <div id="giftShopGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Dynamic Physical Gifts Loaded Here -->
+                    </div>
+
+                    <!-- Custom Gift Form for Meowwww -->
+                    <form onsubmit="addCustomGift(event)" class="pt-3 border-t border-slate-800 grid grid-cols-1 sm:grid-cols-4 gap-2.5">
+                        <input type="text" id="customGiftName" required placeholder="Add physical gift (e.g. PS5 Game)..." class="sm:col-span-2 px-3 py-2 rounded-xl border border-slate-700 bg-slate-900 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        <input type="number" id="customGiftCost" min="50" step="50" required placeholder="Points (e.g. 500)" class="px-3 py-2 rounded-xl border border-slate-700 bg-slate-900 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        <button type="submit" class="py-2 px-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs transition flex items-center justify-center space-x-1">
+                            <i class="fa-solid fa-plus"></i>
+                            <span id="addGiftBtnText">Add Gift</span>
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+
+            <!-- Right Column: Habit Tracker & Meowwww's Love Notes -->
+            <div class="space-y-6">
+
+                <!-- Daily Fitness & Habit Checklist -->
+                <div class="glass-card p-5 sm:p-6 rounded-3xl shadow-sm space-y-4 border-t-4 border-t-emerald-500">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h3 class="text-lg font-bold flex items-center space-x-2">
+                                <i class="fa-solid fa-circle-check text-emerald-400"></i>
+                                <span id="habitQuestTitle">Daily Habit Quest</span>
+                            </h3>
+                            <p class="text-xs text-slate-400"><span id="activeStreakLabel">Active Streak:</span> <strong id="streakDisplayCount" class="text-rose-400">0</strong> <span id="streakDaysUnit">Days!</span></p>
+                        </div>
+                        <span id="habitProgressText" class="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">0/5 Done</span>
+                    </div>
+
+                    <div id="habitsList" class="space-y-3">
+                        <!-- Dynamic Habits Loaded Here -->
+                    </div>
+
+                    <!-- Points Callout Banner -->
+                    <div class="p-3 rounded-2xl bg-purple-500/10 border border-purple-500/25 flex items-center justify-between text-xs">
+                        <span id="dailyPointsHint" class="text-purple-300 font-semibold">Complete all tasks + Check-in = +50 Pts!</span>
+                        <span id="potentialPointsBadge" class="font-black text-amber-400">+10 Pts</span>
+                    </div>
+
+                    <!-- Explicit Daily Check-in Button -->
+                    <button id="dailyCheckInBtn" onclick="completeDailyCheckIn()" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:opacity-95 text-white font-black text-sm shadow-lg shadow-emerald-500/25 active:scale-95 transition flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-calendar-check text-base"></i>
+                        <span id="dailyCheckInBtnText">Complete Daily Check-in</span>
+                    </button>
+
+                    <button onclick="resetHabitsDaily()" class="w-full text-center text-xs text-slate-400 hover:text-slate-200 transition pt-1">
+                        <i class="fa-solid fa-rotate-left mr-1"></i> <span id="resetHabitsBtnText">Reset Habits & Today's Check-in</span>
+                    </button>
+                </div>
+
+                <!-- Earned & Redeemed Rewards Vault -->
+                <div class="glass-card p-5 sm:p-6 rounded-3xl shadow-sm space-y-4 border-t-4 border-t-amber-400">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h3 class="text-lg font-bold flex items-center space-x-2">
+                                <i class="fa-solid fa-ticket text-amber-400"></i>
+                                <span id="claimedVaultTitle">Claimed & Redeemed Privileges</span>
+                            </h3>
+                            <p id="claimedVaultSubtitle" class="text-xs text-slate-400">Tick off when Meowwww grants your coupon!</p>
+                        </div>
+                        <span id="earnedRewardsCount" class="text-xs font-bold px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">0 Unlocked</span>
+                    </div>
+
+                    <div id="claimedVaultContainer" class="space-y-3 max-h-80 overflow-y-auto custom-scrollbar pr-1">
+                        <!-- Unlocked & Claimed Rewards will render here -->
+                    </div>
+                </div>
+
+                <!-- Meowwww's Love Notes Board -->
+                <div class="glass-card p-5 sm:p-6 rounded-3xl shadow-sm space-y-4 border-l-4 border-l-rose-500">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg font-bold flex items-center space-x-2">
+                            <i class="fa-solid fa-heart text-rose-500"></i>
+                            <span id="loveNotesTitle">Meowwww's Love Notes</span>
+                        </h3>
+                    </div>
+
+                    <div class="bg-rose-500/10 p-4 rounded-2xl border border-rose-500/20 space-y-2">
+                        <p id="fanNoteDisplay" class="text-sm font-medium italic text-slate-200">
+                            "So proud of you taking on this journey, babe! Remember: standard scale numbers move up and down, but your effort and muscle build is what counts! Meowwww is cheering for you always!"
+                        </p>
+                        <span class="block text-right text-xs font-bold text-rose-400">— Meowwww ❤️</span>
+                    </div>
+
+                    <div class="space-y-2 pt-2">
+                        <label id="leaveNoteLabel" class="block text-xs font-semibold text-slate-400">Leave a new note from Meowwww:</label>
+                        <textarea id="fanNoteInput" rows="2" placeholder="Write a sweet, spicy or encouraging note for him..." class="w-full p-3 rounded-xl border border-slate-700 bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500"></textarea>
+                        <button onclick="saveFanNote()" class="w-full py-2 rounded-xl bg-gradient-to-r from-rose-500 to-pink-600 hover:opacity-90 text-white font-bold text-xs shadow-md shadow-rose-500/20 transition">
+                            <span id="saveNoteBtnText">Save Love Note</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Weight Loss Tips Card -->
+                <div class="glass-card p-5 rounded-3xl shadow-sm space-y-3">
+                    <h4 class="text-sm font-bold flex items-center space-x-2">
+                        <i class="fa-solid fa-lightbulb text-amber-400"></i>
+                        <span id="proTipsTitle">Meowwww's Fitness Pro-Tips</span>
+                    </h4>
+                    <ul id="proTipsList" class="text-xs space-y-2 text-slate-300">
+                        <li class="flex items-start space-x-2">
+                            <i class="fa-solid fa-check text-emerald-400 mt-0.5"></i>
+                            <span><strong>No Double Meals:</strong> Stick to single lunches & dinners to stay in deficit!</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <i class="fa-solid fa-check text-emerald-400 mt-0.5"></i>
+                            <span><strong>Build Streak:</strong> Complete all habits today to boost your streak counter for Meowwww's rewards!</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <i class="fa-solid fa-check text-emerald-400 mt-0.5"></i>
+                            <span><strong>Miss Meowwww:</strong> Don't forget to tick your daily love check-in for Meowwww!</span>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Coupon Redemption Modal -->
+    <div id="rewardModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 z-50 hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-slate-900 border border-rose-500/30 w-full max-w-md rounded-3xl p-6 text-center space-y-4 shadow-2xl relative overflow-hidden">
+            <div class="w-16 h-16 rounded-full bg-gradient-to-tr from-rose-500 to-amber-500 text-white flex items-center justify-center text-3xl font-black mx-auto shadow-lg shadow-rose-500/30 animate-pulse">
+                <i class="fa-solid fa-crown"></i>
+            </div>
+            
+            <span id="modalBadgeText" class="text-xs font-bold uppercase tracking-widest text-rose-400 block">Privilege Unlocked & Claimed!</span>
+            <h3 id="modalRewardTitle" class="text-2xl font-black text-white">Coupon Title</h3>
+            
+            <div class="bg-slate-950/80 p-4 rounded-2xl border border-slate-800 text-sm text-slate-300 font-medium italic" id="modalRewardDesc">
+                Reward detail text goes here...
+            </div>
+
+            <p id="modalPromptText" class="text-xs text-slate-400">Show this coupon to Meowwww to claim your privilege! ❤️</p>
+
+            <button onclick="closeRewardModal()" class="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:opacity-90 text-white font-bold text-sm shadow-lg shadow-emerald-500/20 transition">
+                <span id="modalBtnText">Thanks Meowwww! 🎉</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Custom Notification Toast -->
+    <div id="toast" class="fixed bottom-5 right-5 max-w-xs bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center space-x-3 translate-y-20 opacity-0 transition-all duration-300 z-50 border border-slate-700">
+        <div id="toastIcon" class="text-emerald-400 text-lg">
+            <i class="fa-solid fa-circle-check"></i>
+        </div>
+        <div id="toastMessage" class="text-xs font-semibold">Action completed!</div>
+    </div>
+
+    <!-- Application Script -->
+    <script>
+        // State Management & LocalStorage Keys (v5 fresh initial state)
+        const STORAGE_KEY_WEIGHTS = 'fitquest_weights_v5';
+        const STORAGE_KEY_GOAL = 'fitquest_goal_v5';
+        const STORAGE_KEY_HABITS = 'fitquest_habits_v5';
+        const STORAGE_KEY_STREAK = 'fitquest_streak_v5';
+        const STORAGE_KEY_CHECKIN_DATE = 'fitquest_last_checkin_v5';
+        const STORAGE_KEY_POINTS = 'fitquest_points_v5';
+        const STORAGE_KEY_CUSTOM_GIFTS = 'fitquest_custom_gifts_v5';
+        const STORAGE_KEY_HIDDEN_GIFTS = 'fitquest_hidden_gifts_v5';
+        const STORAGE_KEY_REDEEMED_GIFTS = 'fitquest_redeemed_gifts_v5';
+        const STORAGE_KEY_NOTE = 'fitquest_note_v5';
+        const STORAGE_KEY_THEME = 'fitquest_theme_v5';
+        const STORAGE_KEY_REDEEMED = 'fitquest_redeemed_coupons_v5';
+        const STORAGE_KEY_LANG = 'fitquest_lang_v5';
+
+        const STARTING_WEIGHT = 100.0;
+        let targetGoal = parseFloat(localStorage.getItem(STORAGE_KEY_GOAL)) || 80.0;
+        let activeRewardTab = 'weight'; // 'weight' or 'streak'
+        let currentStreakDays = parseInt(localStorage.getItem(STORAGE_KEY_STREAK)) || 0;
+        let lastCheckInDate = localStorage.getItem(STORAGE_KEY_CHECKIN_DATE) || '';
+        let effortPoints = parseInt(localStorage.getItem(STORAGE_KEY_POINTS)) || 0;
+        let usedRewardsMap = JSON.parse(localStorage.getItem(STORAGE_KEY_REDEEMED)) || {};
+        let redeemedPhysicalGifts = JSON.parse(localStorage.getItem(STORAGE_KEY_REDEEMED_GIFTS)) || [];
+        let customGifts = JSON.parse(localStorage.getItem(STORAGE_KEY_CUSTOM_GIFTS)) || [];
+        let hiddenDefaultGiftIds = JSON.parse(localStorage.getItem(STORAGE_KEY_HIDDEN_GIFTS)) || [];
+        let currentLang = localStorage.getItem(STORAGE_KEY_LANG) || 'zh';
+
+        // Bilingual Dictionary
+        const i18n = {
+            en: {
+                langBtn: '中文',
+                resetAllBtnText: 'Reset Start',
+                toastFullReset: 'Website reset to 100.0 kg initial state! 🚀',
+                headerSubtitle: "100kg to Hero • Meowwww's Edition",
+                cheerBtnText: 'Cheer from Meowwww',
+                heroBadgeText: "YOU'RE MEOWWWW'S HERO — KEEP PUSHING!",
+                heroTitle: 'From 100 kg to <span class="bg-gradient-to-r from-emerald-400 via-teal-300 to-amber-300 bg-clip-text text-transparent">Peak Physique & Romance.</span>',
+                overallProgressLabel: 'Overall Quest Progress',
+                startWeightLabel: 'Start: 100.0 kg',
+                targetLabelPrefix: 'Target: ',
+                heroTotalLostLabel: 'Total Shedded',
+                heroPercentDoneLabel: 'Goal Progress',
+                statCurrentWeightLabel: 'Current Scale',
+                statTotalLostLabel: 'Total Shedded',
+                statStreakLabel: 'Habit Streak',
+                statPointsLabel: 'Effort Points',
+                statRemainingLabel: 'Remaining',
+                ptsUnit: 'Pts',
+                daysUnit: 'Days',
+                daysExcl: 'Days!',
+                chartTitle: 'Weight Loss Trajectory',
+                chartSubtitle: 'Tracking every step down from 100 kg!',
+                chartWeightLabel: 'Weight (kg)',
+                chartGoalLabel: 'Target Goal (kg)',
+                targetGoalLabel: 'Target Goal:',
+                logWeightTitle: "Log Today's Weight",
+                entryDateLabel: 'Date',
+                entryWeightLabel: 'Weight (kg)',
+                addEntryBtnText: 'Add Entry',
+                recentLogsTitle: 'Recent Progress Logs',
+                thDate: 'Date',
+                thWeight: 'Weight',
+                thChange: 'Change',
+                thAction: 'Action',
+                rewardVaultTitle: "Meowwww's Reward Vault (Every -3kg!)",
+                rewardVaultSubtitle: 'Unlock special privilege coupons every 3kg lost & via Habit Streaks!',
+                tabWeightText: 'Every -3kg Milestones',
+                tabStreakText: 'Habit Streak Power-ups',
+                giftShopTitle: 'Physical Gift Shop',
+                giftShopSubtitle: 'Complete daily habits & check in to earn points for real physical gifts from Meowwww!',
+                customGiftNamePlaceholder: 'Add physical gift (e.g. PS5 Game)...',
+                customGiftCostPlaceholder: 'Points (e.g. 500)',
+                addGiftBtnText: 'Add Gift',
+                redeemGiftBtn: 'Exchange Gift',
+                notEnoughPtsBtn: 'Need More Pts',
+                deleteGiftTitle: 'Delete Gift',
+                toastGiftDeleted: 'Physical gift removed from shop.',
+                habitQuestTitle: 'Daily Habit Quest',
+                activeStreakLabel: 'Active Streak:',
+                doneSuffix: 'Done',
+                dailyPointsHint: 'Complete all 4 tasks + Check-in = +50 Pts!',
+                checkInBtnReady: 'Complete Daily Check-in',
+                checkInBtnDone: 'Checked in today! ✓',
+                resetHabitsBtnText: "Reset Habits & Today's Check-in",
+                claimedVaultTitle: 'Claimed & Redeemed Privileges',
+                claimedVaultSubtitle: 'Tick off when Meowwww grants your coupon or physical gift!',
+                unlockedSuffix: 'Unlocked',
+                noPrivilegesMsg: 'No privileges or gifts unlocked yet! Log your weight & check in daily to earn rewards from Meowwww.',
+                usedBadge: 'USED',
+                useBtn: 'Use',
+                undoBtn: 'Undo',
+                redeemBtn: 'Redeem Privilege 🎁',
+                lockedBtn: 'Locked',
+                daysLeftSuffix: 'Days Left',
+                kgGoalSuffix: 'kg Milestone',
+                streakTargetSuffix: '-Day Streak Target',
+                streakBadgeSuffix: '-Day Streak',
+                giftBadgeText: 'Physical Gift',
+                loveNotesTitle: "Meowwww's Love Notes",
+                defaultLoveNote: '"So proud of you taking on this journey, babe! Every 3kg lost unlocks a new reward, and every daily check-in earns points for real gifts! Meowwww is cheering for you always!"',
+                leaveNoteLabel: 'Leave a new note from Meowwww:',
+                notePlaceholder: 'Write a sweet, spicy or encouraging note for him...',
+                saveNoteBtnText: 'Save Love Note',
+                proTipsTitle: "Meowwww's Fitness Pro-Tips",
+                proTipsHtml: `
+                    <li class="flex items-start space-x-2">
+                        <i class="fa-solid fa-check text-emerald-400 mt-0.5"></i>
+                        <span><strong>Daily Check-in Button:</strong> Tick all 4 habits and press Check-in to earn 50 Effort Points + Streak!</span>
+                    </li>
+                    <li class="flex items-start space-x-2">
+                        <i class="fa-solid fa-check text-emerald-400 mt-0.5"></i>
+                        <span><strong>Every -3kg Reward:</strong> 97kg, 94kg, 91kg, 88kg, 85kg, 82kg & 80kg all have special coupons!</span>
+                    </li>
+                    <li class="flex items-start space-x-2">
+                        <i class="fa-solid fa-check text-emerald-400 mt-0.5"></i>
+                        <span><strong>No Double Meals:</strong> Stick to single lunches & dinners to stay in deficit!</span>
+                    </li>
+                `,
+                modalBadgeText: 'Privilege Unlocked & Claimed!',
+                modalPromptText: 'Show this coupon to Meowwww to claim your privilege! ❤️',
+                modalBtnText: 'Thanks Meowwww! 🎉',
+                toastWeightLogged: 'Weight logged successfully! 💪',
+                toastEntryRemoved: 'Entry removed',
+                toastGoalUpdated: 'Target updated to ',
+                toastAlreadyCheckedIn: 'You already checked in today! Come back tomorrow ❤️',
+                toastCheckInSuccess: '🎉 Daily Check-in Complete! Streak +1 & Earned +',
+                toastHabitsReset: "Habits & today's check-in reset!",
+                toastGiftExchanged: '🎁 Physical Gift redeemed! Added to your Claimed Vault!',
+                toastNotEnoughPoints: 'Not enough Effort Points yet! Keep checking in daily 💪',
+                toastCustomGiftAdded: 'New physical gift added to shop!',
+                toastRewardUsed: 'Reward marked as USED ✓! Enjoy!',
+                toastRewardReset: 'Reward status reset to available.',
+                toastNoteSaved: 'Love note from Meowwww saved! ❤️',
+                toastCheerSent: 'Love & High-Five Sent by Meowwww! You are amazing! 💖',
+                quotes: [
+                    { text: "Consistency is key. Small progress is still progress!", author: "Meowwww ❤️" },
+                    { text: "Every 3kg down unlocks a brand new treat from Meowwww!", author: "Meowwww" },
+                    { text: "Complete all 4 daily habits and click Check-in for +50 Effort Points!", author: "Fitness Pro" },
+                    { text: "80kg gets you the Ultimate Immunity Card — keep pushing, handsome!", author: "Meowwww ❤️" }
+                ]
+            },
+            zh: {
+                langBtn: 'EN',
+                resetAllBtnText: '重置初始狀態',
+                toastFullReset: '已重置為 100.0 kg 初始起點狀態！🚀',
+                headerSubtitle: '100kg 蛻變男神之旅 • Meowwww 專屬應援版',
+                cheerBtnText: '接收 Meowwww 的愛心打氣',
+                heroBadgeText: '你是 MEOWWWW 心目中的大英雄 — 繼續加油！',
+                heroTitle: '從 100 kg 邁向 <span class="bg-gradient-to-r from-emerald-400 via-teal-300 to-amber-300 bg-clip-text text-transparent">巔峰身材與浪漫特權</span>',
+                overallProgressLabel: '總體蛻變進度',
+                startWeightLabel: '起點：100.0 kg',
+                targetLabelPrefix: '目標：',
+                heroTotalLostLabel: '累計已減重',
+                heroPercentDoneLabel: '目標達成率',
+                statCurrentWeightLabel: '目前體重',
+                statTotalLostLabel: '累計已減重',
+                statStreakLabel: '連續打卡',
+                statPointsLabel: '努力積分',
+                statRemainingLabel: '距離目標',
+                ptsUnit: '積分',
+                daysUnit: '天',
+                daysExcl: '天！',
+                chartTitle: '體重下降趨勢圖',
+                chartSubtitle: '記錄從 100 kg 開始的每一步蛻變（每減 3kg 就有獎）！',
+                chartWeightLabel: '體重 (kg)',
+                chartGoalLabel: '目標體重 (kg)',
+                targetGoalLabel: '設定目標：',
+                logWeightTitle: '記錄今日體重',
+                entryDateLabel: '日期',
+                entryWeightLabel: '體重 (kg)',
+                addEntryBtnText: '新增記錄',
+                recentLogsTitle: '近期體重歷史記錄',
+                thDate: '日期',
+                thWeight: '體重',
+                thChange: '變化',
+                thAction: '操作',
+                rewardVaultTitle: 'Meowwww 的獎勵金庫（每減 3kg 有獎！）',
+                rewardVaultSubtitle: '從 100kg 起每減 3kg 即可解鎖專屬特權券，80kg 更可獲得無敵免責金牌！',
+                tabWeightText: '每減 3kg 里程碑獎勵',
+                tabStreakText: '連續打卡天數獎勵',
+                giftShopTitle: '物質禮物兌換商店',
+                giftShopSubtitle: '做齊每日打卡任務賺取「努力積分」，積分足夠即可兌換 Meowwww 送出的實體物質禮物！',
+                customGiftNamePlaceholder: '新增想要的實體禮物（例如：遊戲片、波鞋）...',
+                customGiftCostPlaceholder: '所需積分（如 500）',
+                addGiftBtnText: '新增禮物',
+                redeemGiftBtn: '立即兌換禮物',
+                notEnoughPtsBtn: '積分尚未足夠',
+                deleteGiftTitle: '刪除禮物',
+                toastGiftDeleted: '已從商店刪除該物質禮物',
+                habitQuestTitle: '每日自律打卡任務',
+                activeStreakLabel: '目前連續打卡：',
+                doneSuffix: '已完成',
+                dailyPointsHint: '做齊每日 4 項任務並按打卡 = +50 積分！',
+                checkInBtnReady: '立即每日打卡領積分',
+                checkInBtnDone: '今日已完成打卡 ✓',
+                resetHabitsBtnText: '重置今日任務與打卡狀態',
+                claimedVaultTitle: '已解鎖與兌換的獎勵庫',
+                claimedVaultSubtitle: '領取特權或收到物質禮物後記得打勾 ✓ 標記喔！',
+                unlockedSuffix: '已獲得',
+                noPrivilegesMsg: '尚未解鎖任何獎勵！快來記錄體重（每減 3kg 有獎）與每日打卡賺積分吧！',
+                usedBadge: '已使用 / 已收到',
+                useBtn: '打勾完成 ✓',
+                undoBtn: '取消勾選',
+                redeemBtn: '領取特權券 🎁',
+                lockedBtn: '未解鎖',
+                daysLeftSuffix: '天解鎖',
+                kgGoalSuffix: 'kg 里程碑',
+                streakTargetSuffix: '天連續打卡目標',
+                streakBadgeSuffix: '天連續打卡',
+                giftBadgeText: '物質禮物兌換',
+                loveNotesTitle: 'Meowwww 的專屬情書留言板',
+                defaultLoveNote: '「寶貝，從 100kg 開始每減 3 公斤 Meowwww 都準備了超棒的獎勵給你！每天做齊任務記得按打卡拿積分換物質禮物，80kg 還有做錯什麼都免責的金牌喔！Meowwww 永遠支持你！」',
+                leaveNoteLabel: '由 Meowwww 寫下新的鼓勵留言：',
+                notePlaceholder: '寫下甜蜜、貼心或鼓勵他的話吧...',
+                saveNoteBtnText: '儲存愛心留言',
+                proTipsTitle: 'Meowwww 的瘦身與積分攻略',
+                proTipsHtml: `
+                    <li class="flex items-start space-x-2">
+                        <i class="fa-solid fa-check text-emerald-400 mt-0.5"></i>
+                        <span><strong>每日必按打卡按鈕：</strong>做齊 4 項任務再按「立即每日打卡」，一次狂賺 50 積分與連續天數！</span>
+                    </li>
+                    <li class="flex items-start space-x-2">
+                        <i class="fa-solid fa-check text-emerald-400 mt-0.5"></i>
+                        <span><strong>每減 3kg 都有大獎：</strong>97kg、94kg、91kg、88kg、85kg、82kg 到 80kg 步步有驚喜！</span>
+                    </li>
+                    <li class="flex items-start space-x-2">
+                        <i class="fa-solid fa-check text-emerald-400 mt-0.5"></i>
+                        <span><strong>絕不吃雙份正餐：</strong>午餐和晚餐只吃一份，輕鬆達標！</span>
+                    </li>
+                `,
+                modalBadgeText: '恭喜解鎖專屬獎勵！',
+                modalPromptText: '快把這張特權券拿給 Meowwww 兌現獎勵吧！❤️',
+                modalBtnText: '謝謝親愛的 Meowwww！🎉',
+                toastWeightLogged: '體重記錄成功！繼續衝刺 💪',
+                toastEntryRemoved: '已刪除該筆體重記錄',
+                toastGoalUpdated: '目標體重已更新為 ',
+                toastAlreadyCheckedIn: '今天已經打過卡囉！明天繼續保持 ❤️',
+                toastCheckInSuccess: '🎉 每日打卡成功！連續天數 +1，獲得 +',
+                toastHabitsReset: '今日任務與打卡狀態已重置！',
+                toastGiftExchanged: '🎁 物質禮物兌換成功！已加入右側「已獲得獎勵庫」！',
+                toastNotEnoughPoints: '努力積分還不夠喔！繼續每日打卡累積積分吧 💪',
+                toastCustomGiftAdded: '已將新物質禮物加入兌換商店！',
+                toastRewardUsed: '已打勾標記為「已使用 / 已收到 ✓」！',
+                toastRewardReset: '已恢復為「未完成」狀態。',
+                toastNoteSaved: 'Meowwww 的愛心留言已儲存！❤️',
+                toastCheerSent: '已收到 Meowwww 的愛心打氣與抱抱！你最棒了！💖',
+                quotes: [
+                    { text: "從 100kg 起每減 3 公斤都有獎勵，帥氣男神衝呀！", author: "Meowwww ❤️" },
+                    { text: "每天做齊任務記得按「每日打卡」，累積積分換取心儀的物質禮物！", author: "Meowwww" },
+                    { text: "撐到 80kg 就能拿到「做錯什麼都免責的金牌」，絕對超值！", author: "Meowwww ❤️" },
+                    { text: "今天忍住不吃兩份午餐或晚餐，離 Meowwww 親自下廚又近一步！", author: "自律小助手" }
+                ]
+            }
+        };
+
+        // Default Initial Data
+        // Default Initial Data (Fresh 100.0kg Start)
+        const getTodayISO = () => new Date().toISOString().split('T')[0];
+        const initialWeights = [
+            { date: getTodayISO(), weight: 100.0 }
+        ];
+
+        const initialHabits = [
+            { id: 1, textEn: 'No Double Lunch or Dinner Today', textZh: '不吃兩份午餐或晚餐', completed: false, icon: 'fa-utensils' },
+            { id: 3, textEn: '30+ Min Workout or Cardio Walk', textZh: '運動 30 分鐘以上', completed: false, icon: 'fa-person-running' },
+            { id: 5, textEn: '6 hours quality sleep', textZh: '6小時優質睡眠', completed: false, icon: 'fa-bed' },
+            { id: 6, textEn: 'Miss Meowwww today', textZh: '今天有想念 Meowwww', completed: false, icon: 'fa-heart' }
+        ];
+
+        // Weight Goal Milestones: 9-Tier Progression from 97kg to 76kg
+        const weightMilestones = [
+            { 
+                weight: 97.0, 
+                stepLabelEn: "97 kg (-3kg)",
+                stepLabelZh: "97 kg (減3公斤)",
+                titleEn: "15-Minute Relaxing Massage Pass",
+                titleZh: "15分鐘專屬按摩券",
+                rewardEn: "🎟️ 15-Minute soothing shoulder & back massage by Meowwww!",
+                rewardZh: "🎟️ Meowwww 親自為你提供 15 分鐘肩頸背部舒壓按摩！",
+                descEn: "First 3kg down! Enjoy a relaxing 15-minute shoulder and back massage from Meowwww.",
+                descZh: "成功減掉第一個 3 公斤！享受由 Meowwww 親自為你提供的 15 分鐘專屬肩頸背部舒壓按摩！"
+            },
+            { 
+                weight: 94.0, 
+                stepLabelEn: "94 kg (-6kg)",
+                stepLabelZh: "94 kg (減6公斤)",
+                titleEn: "Single Meal Victory Treat Pass",
+                titleZh: "單餐自律勝利放縱券",
+                rewardEn: "🎟️ Guilt-free favorite snack or dessert treat from Meowwww!",
+                rewardZh: "🎟️ Meowwww 請你吃一份最愛的無罪惡感下午茶或甜點！",
+                descEn: "6kg lost! Rewarding your discipline of never eating two lunches or dinners—enjoy a treat on Meowwww!",
+                descZh: "累計減掉 6 公斤！獎勵你一直堅持不吃兩份午餐或晚餐的超強自律，Meowwww 請你吃一份最愛的甜點或小食！"
+            },
+            { 
+                weight: 91.0, 
+                stepLabelEn: "91 kg (-9kg)",
+                stepLabelZh: "91 kg (減9公斤)",
+                titleEn: "Paper Grading / Marking Service",
+                titleZh: "改卷服務",
+                rewardEn: "🎟️ Meowwww provides a dedicated paper grading & marking service pass!",
+                rewardZh: "🎟️ Meowwww 親自為你提供一次專屬「改卷服務」！",
+                descEn: "9kg shedded! Redeem this pass anytime for Meowwww to help you with paper grading and marking!",
+                descZh: "累計減掉 9 公斤！隨時憑此券召喚 Meowwww 為你提供一次專屬「改卷服務」，幫你輕鬆分擔工作！"
+            },
+            { 
+                weight: 88.0, 
+                stepLabelEn: "88 kg (-12kg)",
+                stepLabelZh: "88 kg (減12公斤)",
+                titleEn: "Single Meal Victory Treat Pass",
+                titleZh: "單餐自律勝利放縱券",
+                rewardEn: "🎟️ Second guilt-free favorite snack or dessert treat from Meowwww!",
+                rewardZh: "🎟️ 再次獲得 Meowwww 請你吃最愛的無罪惡感下午茶或甜點！",
+                descEn: "12kg gone! Another treat pass for keeping up your meal discipline—enjoy a favorite snack on Meowwww!",
+                descZh: "累計減掉 12 公斤！再次獎勵你超強的飲食自律，Meowwww 請你吃一份最愛的甜點或小食！"
+            },
+            { 
+                weight: 85.0, 
+                stepLabelEn: "85 kg (-15kg)",
+                stepLabelZh: "85 kg (減15公斤)",
+                titleEn: "Meowwww's Home-Cooked Meal",
+                titleZh: "Meowwww 親自下廚",
+                rewardEn: "🎟️ Meowwww cooks your favorite delicious meal from scratch!",
+                rewardZh: "🎟️ Meowwww 親自為你煮一頓你最想吃的美食！",
+                descEn: "15kg lost! Meowwww will personally step into the kitchen and cook your favorite delicious meal.",
+                descZh: "累計減掉 15 公斤！Meowwww 親自走進廚房為你烹調一頓你最愛吃的美食大餐！"
+            },
+            { 
+                weight: 82.0, 
+                stepLabelEn: "82 kg (-18kg)",
+                stepLabelZh: "82 kg (減18公斤)",
+                titleEn: "Meowwww Solo-Ranks AoV Tier Up",
+                titleZh: "Meowwww 自己單排傳說對決升段",
+                rewardEn: "🎟️ Meowwww plays solo ranked in AoV until ranking up a tier!",
+                rewardZh: "🎟️ Meowwww 自己單排傳說對決排位，直至升段！",
+                descEn: "18kg shedded! Hand over your account—Meowwww will play solo ranked matches in Arena of Valor until ranking up a tier!",
+                descZh: "累計減掉 18 公斤！Meowwww 自己登入帳號打《傳說對決》單排排位賽，一直打到升段為止！"
+            },
+            { 
+                weight: 80.0, 
+                stepLabelEn: "80 kg (-20kg)",
+                stepLabelZh: "80 kg (減20公斤)",
+                titleEn: "Ultimate Freedom Day",
+                titleZh: "一整天完全自由日",
+                rewardEn: "🎟️ Decide anything to do with Meowwww all day!",
+                rewardZh: "🎟️ 一整天完全自由，決定同 Meowwww 做什麼都可以！",
+                descEn: "20kg milestone reached! For one whole day, you are the boss—decide anything to do with Meowwww all day!",
+                descZh: "恭喜達成 80kg 大關！整整 24 小時完全自由，決定同 Meowwww 做什麼都可以！"
+            },
+            { 
+                weight: 78.0, 
+                stepLabelEn: "78 kg (-22kg)",
+                stepLabelZh: "78 kg (減22公斤)",
+                titleEn: "Universal Immunity Pass",
+                titleZh: "做錯什麼都免責券",
+                rewardEn: "🎟️ GOLDEN IMMUNITY PASS: Whatever mistake you make, Meowwww forgives you 100%!",
+                rewardZh: "🎟️ 無敵免責金牌：無論做錯什麼事，出示此券即刻完全免責、零責怪！",
+                descEn: "22kg lost! Use this golden immunity card once whenever you make a mistake—Meowwww promises zero anger and instant forgiveness!",
+                descZh: "累計減掉 22 公斤！這張無敵免責金牌可隨時使用一次——無論做錯什麼事，Meowwww 保證完全原諒、絕不生氣！"
+            },
+            { 
+                weight: 76.0, 
+                stepLabelEn: "76 kg (-24kg FINAL)",
+                stepLabelZh: "76 kg (終極大獎！)",
+                titleEn: "Ultimate Wish Pass",
+                titleZh: "終極許願",
+                rewardEn: "🎟️ SUPREME WISH COUPON: Make any wish come true with Meowwww!",
+                rewardZh: "🎟️ 終極許願券：向 Meowwww 許下任何一個願望，無條件為你實現！",
+                descEn: "24KG LEGENDARY HERO ACHIEVED! Redeem this Ultimate Wish Pass for any wish you desire from Meowwww!",
+                descZh: "恭喜達成終極傳奇目標！憑此「終極許願」券，可向 Meowwww 許下任何一個願望，Meowwww 無條件為你實現！"
+            }
+        ];
+
+        // Habit Streak Milestones (Days) - Non-gaming 7-day reward!
+        const streakMilestones = [
+            {
+                days: 3,
+                titleEn: "3-Day Consistency Perk",
+                titleZh: "3天連續打卡小確幸",
+                rewardEn: "🎟️ 15-Minute Head & Shoulder Relaxer Massage",
+                rewardZh: "🎟️ Meowwww 專屬 15 分鐘頭部與肩頸舒壓按摩",
+                descEn: "Great start! Enjoy a 15-minute relaxing head or shoulder massage from Meowwww.",
+                descZh: "完美的開始！享受由 Meowwww 提供的 15 分鐘頭部與肩頸放鬆按摩。"
+            },
+            {
+                days: 7,
+                titleEn: "Meowwww's Movie Night & Snack Pick",
+                titleZh: "Meowwww 專屬電影之夜＋自選零食",
+                rewardEn: "🎟️ Cozy movie night with Meowwww + your favorite snacks on Meowwww!",
+                rewardZh: "🎟️ Meowwww 陪你睇戲的浪漫電影之夜，加上你任選的零食大禮包！",
+                descEn: "7 Days of strong habits! Pick any movie you want to watch with Meowwww plus your favorite snacks!",
+                descZh: "連續 7 天自律打卡成功！由你挑選任何想看的電影，Meowwww 陪你共度電影之夜並送上你最愛的零食！"
+            },
+            {
+                days: 14,
+                titleEn: "14-Day Ultimate Freedom Day",
+                titleZh: "14天鋼鐵意志自由日",
+                rewardEn: "🎟️ Decide anything to do with Meowwww all day!",
+                rewardZh: "🎟️ 一整天完全自由，決定同 Meowwww 做什麼都可以！",
+                descEn: "2 Weeks of non-stop daily check-ins! Enjoy 1 Ultimate Freedom Day—decide anything to do with Meowwww all day!",
+                descZh: "連續兩週不間斷打卡！享受一整天完全自由，決定同 Meowwww 做什麼都可以！"
+            },
+            {
+                days: 21,
+                titleEn: "21-Day Habit Champion",
+                titleZh: "21天習慣養成冠軍禮",
+                rewardEn: "🎟️ Meowwww's Home-Cooked Meal of your choice!",
+                rewardZh: "🎟️ Meowwww 親自下廚為你烹調最愛美食！",
+                descEn: "21 Days forms a permanent habit! Meowwww cooks your favorite delicious meal from scratch!",
+                descZh: "21 天已經養成超強自律習慣！Meowwww 親自下廚為你烹調你最愛吃的美食！"
+            }
+        ];
+
+        // Default Physical Gifts in Shop
+        const defaultPhysicalGifts = [
+            {
+                id: 'gift_drink',
+                cost: 150,
+                icon: 'fa-mug-hot',
+                titleEn: 'Favorite Iced Drink / Bubble Tea',
+                titleZh: '心儀手搖飲品 / 冰涼特飲一杯',
+                descEn: 'Meowwww buys you any bubble tea, iced coffee, or drink you want!',
+                descZh: '由 Meowwww 買單請你喝一杯你最愛的手搖飲品或冰涼特飲！'
+            },
+            {
+                id: 'gift_accessory',
+                cost: 300,
+                icon: 'fa-computer-mouse',
+                titleEn: 'Gaming Mousepad / Phone Case',
+                titleZh: '電競滑鼠墊 / 專屬手機殼配件',
+                descEn: 'A brand new desk accessory, mousepad, or phone case picked by you!',
+                descZh: '由你挑選一款全新電競滑鼠墊、手機殼或實用桌面小配件！'
+            },
+            {
+                id: 'gift_sportswear',
+                cost: 500,
+                icon: 'fa-shirt',
+                titleEn: 'New Sportswear / Gym Outfit',
+                titleZh: '全新運動排汗衫 / 健身戰衣',
+                descEn: 'Look sharp at the gym! Meowwww buys you a new sports tee or shorts.',
+                descZh: '身材變帥當然要換新戰衣！Meowwww 送你一件全新運動排汗衫或運動褲！'
+            },
+            {
+                id: 'gift_tech',
+                cost: 800,
+                icon: 'fa-headphones',
+                titleEn: 'Sneakers / Headphones / Tech Gadget',
+                titleZh: '心儀波鞋 / 藍牙耳機 / 數碼禮物',
+                descEn: 'Big milestone physical gift: new sneakers, wireless earbuds, or gaming gear!',
+                descZh: '超豪華物質獎勵：心儀已久的波鞋、藍牙耳機或電競周邊禮物！'
+            },
+            {
+                id: 'gift_grand',
+                cost: 1200,
+                icon: 'fa-gift',
+                titleEn: 'Grand Physical Wish Gift from Meowwww',
+                titleZh: 'Meowwww 神秘終極實體大禮',
+                descEn: 'Redeem your hard-earned points for a major physical wish gift from Meowwww!',
+                descZh: '憑努力累積的 1200 積分，向 Meowwww 兌換一份你最想要的終極實體大禮！'
+            }
+        ];
+
+        let weightEntries = JSON.parse(localStorage.getItem(STORAGE_KEY_WEIGHTS)) || initialWeights;
+        let storedHabits = JSON.parse(localStorage.getItem(STORAGE_KEY_HABITS));
+        // Migrate old habit lists if they still had Water or Protein so the exact 4 requested habits appear
+        const validIds = [1, 3, 5, 6];
+        let habits = (storedHabits && storedHabits.length === 4 && storedHabits.every(h => validIds.includes(h.id)))
+            ? storedHabits.map((h, idx) => ({
+                ...h,
+                textEn: initialHabits[idx].textEn,
+                textZh: initialHabits[idx].textZh,
+                icon: initialHabits[idx].icon
+            }))
+            : initialHabits;
+
+        let chartInstance = null;
+
+        // On Page Load Initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            initTheme();
+            document.getElementById('entryDate').value = new Date().toISOString().split('T')[0];
+            document.getElementById('targetGoalInput').value = targetGoal;
+            
+            applyLanguageTexts();
+            renderAll();
+        });
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'zh' : 'en';
+            localStorage.setItem(STORAGE_KEY_LANG, currentLang);
+            applyLanguageTexts();
+            renderAll();
+        }
+
+        function applyLanguageTexts() {
+            const t = i18n[currentLang];
+            document.getElementById('langToggleText').innerText = t.langBtn;
+            document.getElementById('resetAllBtnText').innerText = t.resetAllBtnText;
+            document.getElementById('headerSubtitle').innerText = t.headerSubtitle;
+            document.getElementById('cheerBtnText').innerText = t.cheerBtnText;
+            document.getElementById('heroBadgeText').innerText = t.heroBadgeText;
+            document.getElementById('heroTitle').innerHTML = t.heroTitle;
+            document.getElementById('overallProgressLabel').innerText = t.overallProgressLabel;
+            document.getElementById('startWeightLabel').innerText = t.startWeightLabel;
+            document.getElementById('heroTotalLostLabel').innerText = t.heroTotalLostLabel;
+            document.getElementById('heroPercentDoneLabel').innerText = t.heroPercentDoneLabel;
+            
+            document.getElementById('statCurrentWeightLabel').innerText = t.statCurrentWeightLabel;
+            document.getElementById('statTotalLostLabel').innerText = t.statTotalLostLabel;
+            document.getElementById('statStreakLabel').innerText = t.statStreakLabel;
+            document.getElementById('statPointsLabel').innerText = t.statPointsLabel;
+            document.getElementById('statRemainingLabel').innerText = t.statRemainingLabel;
+
+            document.getElementById('chartTitle').innerText = t.chartTitle;
+            document.getElementById('chartSubtitle').innerText = t.chartSubtitle;
+            document.getElementById('targetGoalLabel').innerText = t.targetGoalLabel;
+
+            document.getElementById('logWeightTitle').innerText = t.logWeightTitle;
+            document.getElementById('entryDateLabel').innerText = t.entryDateLabel;
+            document.getElementById('entryWeightLabel').innerText = t.entryWeightLabel;
+            document.getElementById('addEntryBtnText').innerText = t.addEntryBtnText;
+            document.getElementById('recentLogsTitle').innerText = t.recentLogsTitle;
+            document.getElementById('thDate').innerText = t.thDate;
+            document.getElementById('thWeight').innerText = t.thWeight;
+            document.getElementById('thChange').innerText = t.thChange;
+            document.getElementById('thAction').innerText = t.thAction;
+
+            document.getElementById('rewardVaultTitle').innerText = t.rewardVaultTitle;
+            document.getElementById('rewardVaultSubtitle').innerText = t.rewardVaultSubtitle;
+            document.getElementById('tabWeightText').innerText = t.tabWeightText;
+            document.getElementById('tabStreakText').innerText = t.tabStreakText;
+
+            document.getElementById('giftShopTitle').innerText = t.giftShopTitle;
+            document.getElementById('giftShopSubtitle').innerText = t.giftShopSubtitle;
+            document.getElementById('customGiftName').placeholder = t.customGiftNamePlaceholder;
+            document.getElementById('customGiftCost').placeholder = t.customGiftCostPlaceholder;
+            document.getElementById('addGiftBtnText').innerText = t.addGiftBtnText;
+
+            document.getElementById('habitQuestTitle').innerText = t.habitQuestTitle;
+            document.getElementById('activeStreakLabel').innerText = t.activeStreakLabel;
+            document.getElementById('streakDaysUnit').innerText = t.daysExcl;
+            document.getElementById('dailyPointsHint').innerText = t.dailyPointsHint;
+            document.getElementById('resetHabitsBtnText').innerText = t.resetHabitsBtnText;
+
+            document.getElementById('claimedVaultTitle').innerText = t.claimedVaultTitle;
+            document.getElementById('claimedVaultSubtitle').innerText = t.claimedVaultSubtitle;
+
+            document.getElementById('loveNotesTitle').innerText = t.loveNotesTitle;
+            const savedNote = localStorage.getItem(STORAGE_KEY_NOTE);
+            document.getElementById('fanNoteDisplay').innerText = savedNote ? `"${savedNote}"` : t.defaultLoveNote;
+            document.getElementById('leaveNoteLabel').innerText = t.leaveNoteLabel;
+            document.getElementById('fanNoteInput').placeholder = t.notePlaceholder;
+            document.getElementById('saveNoteBtnText').innerText = t.saveNoteBtnText;
+
+            document.getElementById('proTipsTitle').innerText = t.proTipsTitle;
+            document.getElementById('proTipsList').innerHTML = t.proTipsHtml;
+
+            document.getElementById('modalBadgeText').innerText = t.modalBadgeText;
+            document.getElementById('modalPromptText').innerText = t.modalPromptText;
+            document.getElementById('modalBtnText').innerText = t.modalBtnText;
+
+            newQuote();
+        }
+
+        function initTheme() {
+            const savedTheme = localStorage.getItem(STORAGE_KEY_THEME) || 'dark';
+            if (savedTheme === 'dark') {
+                document.documentElement.classList.add('dark');
+                document.getElementById('themeIcon').className = 'fa-solid fa-sun text-amber-400';
+            } else {
+                document.documentElement.classList.remove('dark');
+                document.getElementById('themeIcon').className = 'fa-solid fa-moon text-slate-600';
+            }
+        }
+
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem(STORAGE_KEY_THEME, isDark ? 'dark' : 'light');
+            document.getElementById('themeIcon').className = isDark ? 'fa-solid fa-sun text-amber-400' : 'fa-solid fa-moon text-slate-600';
+            renderChart();
+        }
+
+        // Render Functions
+        function renderAll() {
+            const t = i18n[currentLang];
+            weightEntries.sort((a, b) => new Date(a.date) - new Date(b.date));
+            localStorage.setItem(STORAGE_KEY_WEIGHTS, JSON.stringify(weightEntries));
+
+            const latestWeight = weightEntries.length > 0 ? weightEntries[weightEntries.length - 1].weight : STARTING_WEIGHT;
+            const totalLost = (STARTING_WEIGHT - latestWeight).toFixed(1);
+            const totalTargetDistance = STARTING_WEIGHT - targetGoal;
+            const currentProgressDistance = STARTING_WEIGHT - latestWeight;
+            let percentDone = totalTargetDistance > 0 ? Math.min(100, Math.max(0, (currentProgressDistance / totalTargetDistance) * 100)).toFixed(0) : 0;
+
+            const remaining = (latestWeight - targetGoal).toFixed(1);
+
+            document.getElementById('currentWeightDisplay').innerText = `${latestWeight} kg`;
+            document.getElementById('targetWeightDisplay').innerText = `${t.targetLabelPrefix}${targetGoal} kg`;
+            document.getElementById('heroTotalLost').innerText = `${totalLost > 0 ? totalLost : 0.0} kg`;
+            document.getElementById('heroPercentDone').innerText = `${percentDone}%`;
+            document.getElementById('heroProgressBar').style.width = `${percentDone}%`;
+
+            document.getElementById('statCurrentWeight').innerText = `${latestWeight} kg`;
+            document.getElementById('statTotalLost').innerText = `${totalLost > 0 ? totalLost : 0.0} kg`;
+            document.getElementById('statRemaining').innerText = `${remaining > 0 ? remaining : 0.0} kg`;
+            
+            document.getElementById('statStreak').innerText = `${currentStreakDays} ${t.daysUnit}`;
+            document.getElementById('streakDisplayCount').innerText = currentStreakDays;
+            document.getElementById('statPoints').innerText = `${effortPoints} ${t.ptsUnit}`;
+            document.getElementById('shopPointsBalance').innerText = `${effortPoints} ${t.ptsUnit}`;
+
+            renderChart();
+            renderHistoryTable();
+            renderHabits();
+            renderMilestones(latestWeight);
+            renderGiftShop();
+            renderEarnedVault(latestWeight);
+        }
+
+        function renderChart() {
+            const t = i18n[currentLang];
+            const ctx = document.getElementById('weightChart').getContext('2d');
+            const isDark = document.documentElement.classList.contains('dark');
+            
+            const labels = weightEntries.map(e => e.date);
+            const data = weightEntries.map(e => e.weight);
+            const goalData = weightEntries.map(() => targetGoal);
+
+            const gridColor = isDark ? 'rgba(51, 65, 85, 0.4)' : 'rgba(229, 231, 235, 0.8)';
+            const textColor = isDark ? '#94a3b8' : '#64748b';
+
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: t.chartWeightLabel,
+                            data: data,
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.12)',
+                            fill: true,
+                            tension: 0.3,
+                            borderWidth: 3,
+                            pointBackgroundColor: '#10b981',
+                            pointRadius: 5,
+                            pointHoverRadius: 7
+                        },
+                        {
+                            label: t.chartGoalLabel,
+                            data: goalData,
+                            borderColor: '#f43f5e',
+                            borderDash: [6, 6],
+                            borderWidth: 2,
+                            pointRadius: 0,
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: textColor,
+                                font: { family: 'Inter', weight: '600', size: 12 }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: isDark ? '#0f172a' : '#ffffff',
+                            titleColor: isDark ? '#ffffff' : '#0f172a',
+                            bodyColor: isDark ? '#cbd5e1' : '#334155',
+                            borderColor: isDark ? '#334155' : '#e2e8f0',
+                            borderWidth: 1,
+                            padding: 10,
+                            displayColors: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return `${t.chartWeightLabel}: ${context.raw} kg`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: gridColor },
+                            ticks: { color: textColor, font: { family: 'Inter', size: 11 } }
+                        },
+                        y: {
+                            min: Math.max(40, Math.floor(targetGoal - 5)),
+                            max: 102,
+                            grid: { color: gridColor },
+                            ticks: { color: textColor, font: { family: 'Inter', size: 11 } }
+                        }
+                    }
+                }
+            });
+        }
+
+        function handleWeightSubmit(e) {
+            e.preventDefault();
+            const t = i18n[currentLang];
+            const dateVal = document.getElementById('entryDate').value;
+            const weightVal = parseFloat(document.getElementById('entryWeight').value);
+
+            if (!dateVal || isNaN(weightVal)) return;
+
+            const existingIndex = weightEntries.findIndex(item => item.date === dateVal);
+            if (existingIndex >= 0) {
+                weightEntries[existingIndex].weight = weightVal;
+            } else {
+                weightEntries.push({ date: dateVal, weight: weightVal });
+            }
+
+            document.getElementById('entryWeight').value = '';
+            showToast(t.toastWeightLogged);
+            
+            confetti({
+                particleCount: 80,
+                spread: 60,
+                origin: { y: 0.7 }
+            });
+
+            renderAll();
+        }
+
+        function deleteWeightEntry(date) {
+            const t = i18n[currentLang];
+            weightEntries = weightEntries.filter(e => e.date !== date);
+            showToast(t.toastEntryRemoved);
+            renderAll();
+        }
+
+        function renderHistoryTable() {
+            const tbody = document.getElementById('weightHistoryTable');
+            tbody.innerHTML = '';
+
+            const sortedReversed = [...weightEntries].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            sortedReversed.forEach((entry) => {
+                const tr = document.createElement('tr');
+                
+                let changeHtml = '<span class="text-slate-400">-</span>';
+                const originalIdx = weightEntries.findIndex(e => e.date === entry.date);
+                if (originalIdx > 0) {
+                    const diff = (entry.weight - weightEntries[originalIdx - 1].weight).toFixed(1);
+                    if (diff < 0) {
+                        changeHtml = `<span class="text-emerald-400 font-bold"><i class="fa-solid fa-arrow-down text-xs mr-0.5"></i>${Math.abs(diff)} kg</span>`;
+                    } else if (diff > 0) {
+                        changeHtml = `<span class="text-rose-400 font-bold"><i class="fa-solid fa-arrow-up text-xs mr-0.5"></i>+${diff} kg</span>`;
+                    } else {
+                        changeHtml = `<span class="text-slate-400">0.0 kg</span>`;
+                    }
+                }
+
+                tr.innerHTML = `
+                    <td class="py-2.5 font-medium text-slate-300">${entry.date}</td>
+                    <td class="py-2.5 font-bold">${entry.weight} kg</td>
+                    <td class="py-2.5">${changeHtml}</td>
+                    <td class="py-2.5 text-right">
+                        <button onclick="deleteWeightEntry('${entry.date}')" class="text-slate-400 hover:text-red-500 transition px-2 py-1">
+                            <i class="fa-solid fa-trash-can text-xs"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function updateTargetGoal(val) {
+            const t = i18n[currentLang];
+            const num = parseFloat(val);
+            if (!isNaN(num) && num > 40 && num < 100) {
+                targetGoal = num;
+                localStorage.setItem(STORAGE_KEY_GOAL, targetGoal);
+                showToast(`${t.toastGoalUpdated}${targetGoal} kg`);
+                renderAll();
+            }
+        }
+
+        function getTodayDateString() {
+            return new Date().toISOString().split('T')[0];
+        }
+
+        function calculateCheckInReward(completedCount, totalCount) {
+            if (completedCount === totalCount && totalCount > 0) {
+                return 50; // Full bonus for completing all daily tasks!
+            }
+            return 10 + completedCount * 6; // Base 10 pts + 6 pts per completed task
+        }
+
+        function renderHabits() {
+            const t = i18n[currentLang];
+            const container = document.getElementById('habitsList');
+            container.innerHTML = '';
+
+            let completedCount = 0;
+
+            habits.forEach((habit) => {
+                if (habit.completed) completedCount++;
+                const labelText = currentLang === 'zh' ? habit.textZh : habit.textEn;
+
+                const div = document.createElement('div');
+                div.className = `p-3 rounded-2xl flex items-center justify-between border cursor-pointer transition ${
+                    habit.completed 
+                    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' 
+                    : 'bg-slate-900/50 border-slate-800 hover:border-slate-700'
+                }`;
+                div.onclick = () => toggleHabit(habit.id);
+
+                div.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 rounded-xl ${habit.completed ? 'bg-emerald-500 text-white' : 'bg-slate-800 text-slate-400'} flex items-center justify-center text-sm transition">
+                            <i class="fa-solid ${habit.icon}"></i>
+                        </div>
+                        <span class="text-xs sm:text-sm font-semibold ${habit.completed ? 'line-through opacity-80' : ''}">${labelText}</span>
+                    </div>
+                    <div class="w-6 h-6 rounded-lg border ${habit.completed ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-700'} flex items-center justify-center text-xs">
+                        ${habit.completed ? '<i class="fa-solid fa-check"></i>' : ''}
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+
+            document.getElementById('habitProgressText').innerText = `${completedCount}/${habits.length} ${t.doneSuffix}`;
+
+            // Update potential points badge
+            const potentialPts = calculateCheckInReward(completedCount, habits.length);
+            document.getElementById('potentialPointsBadge').innerText = `+${potentialPts} ${t.ptsUnit}`;
+
+            // Update Daily Check-in Button state
+            const todayStr = getTodayDateString();
+            const isCheckedInToday = lastCheckInDate === todayStr;
+            const checkInBtn = document.getElementById('dailyCheckInBtn');
+            const checkInBtnText = document.getElementById('dailyCheckInBtnText');
+
+            if (isCheckedInToday) {
+                checkInBtn.className = 'w-full py-3.5 rounded-2xl bg-slate-800 border border-emerald-500/40 text-emerald-400 font-black text-sm cursor-default flex items-center justify-center space-x-2';
+                checkInBtnText.innerText = t.checkInBtnDone;
+            } else {
+                checkInBtn.className = 'w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:opacity-95 text-white font-black text-sm shadow-lg shadow-emerald-500/25 active:scale-95 transition flex items-center justify-center space-x-2';
+                checkInBtnText.innerText = `${t.checkInBtnReady} (+${potentialPts} ${t.ptsUnit})`;
+            }
+        }
+
+        function toggleHabit(id) {
+            habits = habits.map(h => {
+                if (h.id === id) {
+                    const nextState = !h.completed;
+                    if (nextState) {
+                        confetti({ particleCount: 25, spread: 35, origin: { y: 0.8 } });
+                    }
+                    return { ...h, completed: nextState };
+                }
+                return h;
+            });
+            localStorage.setItem(STORAGE_KEY_HABITS, JSON.stringify(habits));
+            renderAll();
+        }
+
+        function completeDailyCheckIn() {
+            const t = i18n[currentLang];
+            const todayStr = getTodayDateString();
+
+            if (lastCheckInDate === todayStr) {
+                showToast(t.toastAlreadyCheckedIn);
+                return;
+            }
+
+            const completedCount = habits.filter(h => h.completed).length;
+            const earnedPts = calculateCheckInReward(completedCount, habits.length);
+
+            lastCheckInDate = todayStr;
+            currentStreakDays += 1;
+            effortPoints += earnedPts;
+
+            localStorage.setItem(STORAGE_KEY_CHECKIN_DATE, lastCheckInDate);
+            localStorage.setItem(STORAGE_KEY_STREAK, currentStreakDays);
+            localStorage.setItem(STORAGE_KEY_POINTS, effortPoints);
+
+            confetti({ particleCount: 120, spread: 85, origin: { y: 0.6 } });
+            showToast(`${t.toastCheckInSuccess}${earnedPts} ${t.ptsUnit}!`);
+            renderAll();
+        }
+
+        function resetHabitsDaily() {
+            const t = i18n[currentLang];
+            habits = habits.map(h => ({ ...h, completed: false }));
+            lastCheckInDate = '';
+            localStorage.setItem(STORAGE_KEY_HABITS, JSON.stringify(habits));
+            localStorage.removeItem(STORAGE_KEY_CHECKIN_DATE);
+            showToast(t.toastHabitsReset);
+            renderAll();
+        }
+
+        function switchRewardTab(tab) {
+            activeRewardTab = tab;
+            const weightBtn = document.getElementById('tabWeightBtn');
+            const streakBtn = document.getElementById('tabStreakBtn');
+
+            if (tab === 'weight') {
+                weightBtn.className = 'px-4 py-1.5 rounded-xl text-xs font-bold bg-rose-500 text-white shadow-md transition flex items-center space-x-1.5';
+                streakBtn.className = 'px-4 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-400 hover:text-white transition flex items-center space-x-1.5';
+            } else {
+                streakBtn.className = 'px-4 py-1.5 rounded-xl text-xs font-bold bg-rose-500 text-white shadow-md transition flex items-center space-x-1.5';
+                weightBtn.className = 'px-4 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-400 hover:text-white transition flex items-center space-x-1.5';
+            }
+
+            const latestWeight = weightEntries.length > 0 ? weightEntries[weightEntries.length - 1].weight : STARTING_WEIGHT;
+            renderMilestones(latestWeight);
+        }
+
+        function renderMilestones(currentWeight) {
+            const t = i18n[currentLang];
+            const container = document.getElementById('milestonesGrid');
+            container.innerHTML = '';
+
+            if (activeRewardTab === 'weight') {
+                weightMilestones.forEach(m => {
+                    const isUnlocked = currentWeight <= m.weight;
+                    const stepLabel = currentLang === 'zh' ? m.stepLabelZh : m.stepLabelEn;
+                    const title = currentLang === 'zh' ? m.titleZh : m.titleEn;
+                    const reward = currentLang === 'zh' ? m.rewardZh : m.rewardEn;
+                    const desc = currentLang === 'zh' ? m.descZh : m.descEn;
+
+                    const card = document.createElement('div');
+                    card.className = `p-4 rounded-2xl border transition relative overflow-hidden flex flex-col justify-between ${
+                        isUnlocked 
+                        ? 'bg-gradient-to-br from-rose-500/10 via-amber-500/10 to-emerald-500/10 border-rose-500/40 shadow-md' 
+                        : 'bg-slate-900/40 border-slate-800 opacity-80'
+                    }`;
+
+                    card.innerHTML = `
+                        <div>
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="text-xs font-bold px-2.5 py-0.5 rounded-full ${isUnlocked ? 'bg-rose-500 text-white' : 'bg-slate-800 text-slate-400'}">
+                                    ${stepLabel}
+                                </span>
+                                <i class="fa-solid ${isUnlocked ? 'fa-unlock text-emerald-400' : 'fa-lock text-slate-600'}"></i>
+                            </div>
+                            <h4 class="font-black text-sm text-white mb-1">${title}</h4>
+                            <p class="text-xs text-slate-300 font-medium mb-3">${reward}</p>
+                        </div>
+                        
+                        <button ${isUnlocked ? `onclick="claimCoupon('${title.replace(/'/g, "\\'")}', '${desc.replace(/'/g, "\\'")}')"` : 'disabled'} class="w-full py-2 rounded-xl text-xs font-bold transition ${
+                            isUnlocked 
+                            ? 'bg-gradient-to-r from-rose-500 via-pink-500 to-amber-500 hover:opacity-95 text-white shadow-lg active:scale-95' 
+                            : 'bg-slate-800 text-slate-500 cursor-not-allowed'
+                        }">
+                            ${isUnlocked ? t.redeemBtn : t.lockedBtn}
+                        </button>
+                    `;
+                    container.appendChild(card);
+                });
+            } else {
+                streakMilestones.forEach(m => {
+                    const isUnlocked = currentStreakDays >= m.days;
+                    const title = currentLang === 'zh' ? m.titleZh : m.titleEn;
+                    const reward = currentLang === 'zh' ? m.rewardZh : m.rewardEn;
+                    const desc = currentLang === 'zh' ? m.descZh : m.descEn;
+
+                    const card = document.createElement('div');
+                    card.className = `p-4 rounded-2xl border transition relative overflow-hidden flex flex-col justify-between ${
+                        isUnlocked 
+                        ? 'bg-gradient-to-br from-amber-500/10 via-rose-500/10 to-emerald-500/10 border-amber-500/40 shadow-md' 
+                        : 'bg-slate-900/40 border-slate-800 opacity-80'
+                    }`;
+
+                    card.innerHTML = `
+                        <div>
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="text-xs font-bold px-2.5 py-0.5 rounded-full ${isUnlocked ? 'bg-amber-500 text-slate-950 font-black' : 'bg-slate-800 text-slate-400'}">
+                                    ${m.days}${t.streakTargetSuffix}
+                                </span>
+                                <svg class="w-4 h-4 ${isUnlocked ? 'text-amber-400' : 'text-slate-600'} fill-current" viewBox="0 0 24 24"><path d="M12.9 2.6c-.4-.5-1.2-.5-1.5.1-1.3 2.5-3.4 4.5-4.8 7-1.1 1.9-1.6 4.1-1.1 6.3.7 3.2 3.5 5.6 6.8 5.9 3.7.3 7-2.3 7.6-6 .4-2.4-.3-4.9-1.8-6.8-.4-.5-1.2-.4-1.4.2-.4 1.1-1.2 1.9-2.2 2.2-.3.1-.6-.2-.5-.5.5-2.9-.3-5.9-1.1-8.4z"/></svg>
+                            </div>
+                            <h4 class="font-black text-sm text-white mb-1">${title}</h4>
+                            <p class="text-xs text-slate-300 font-medium mb-3">${reward}</p>
+                        </div>
+                        
+                        <button ${isUnlocked ? `onclick="claimCoupon('${title.replace(/'/g, "\\'")}', '${desc.replace(/'/g, "\\'")}')"` : 'disabled'} class="w-full py-2 rounded-xl text-xs font-bold transition ${
+                            isUnlocked 
+                            ? 'bg-gradient-to-r from-amber-500 via-rose-500 to-pink-500 hover:opacity-95 text-white shadow-lg active:scale-95' 
+                            : 'bg-slate-800 text-slate-500 cursor-not-allowed'
+                        }">
+                            ${isUnlocked ? t.redeemBtn : `${m.days - currentStreakDays} ${t.daysLeftSuffix}`}
+                        </button>
+                    `;
+                    container.appendChild(card);
+                });
+            }
+        }
+
+        function renderGiftShop() {
+            const t = i18n[currentLang];
+            const container = document.getElementById('giftShopGrid');
+            container.innerHTML = '';
+
+            const visibleDefaultGifts = defaultPhysicalGifts.filter(g => !hiddenDefaultGiftIds.includes(g.id));
+            const allGifts = [...visibleDefaultGifts, ...customGifts];
+
+            allGifts.forEach(gift => {
+                const canAfford = effortPoints >= gift.cost;
+                const title = currentLang === 'zh' ? (gift.titleZh || gift.titleEn) : (gift.titleEn || gift.titleZh);
+                const desc = currentLang === 'zh' ? (gift.descZh || gift.descEn) : (gift.descEn || gift.descZh);
+
+                const card = document.createElement('div');
+                card.className = `p-4 rounded-2xl border transition flex flex-col justify-between ${
+                    canAfford
+                    ? 'bg-gradient-to-br from-purple-500/10 via-slate-900 to-amber-500/10 border-purple-500/40 shadow-md'
+                    : 'bg-slate-900/40 border-slate-800 opacity-85'
+                }`;
+
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="inline-flex items-center space-x-1 text-xs font-black px-2.5 py-0.5 rounded-full ${canAfford ? 'bg-purple-500 text-white' : 'bg-slate-800 text-slate-400'}">
+                                <i class="fa-solid fa-coins text-amber-300 text-[10px]"></i>
+                                <span>${gift.cost} ${t.ptsUnit}</span>
+                            </span>
+                            <div class="flex items-center space-x-2">
+                                <i class="fa-solid ${gift.icon || 'fa-gift'} text-purple-400"></i>
+                                <button onclick="deletePhysicalGift('${gift.id}')" title="${t.deleteGiftTitle}" class="w-7 h-7 rounded-lg bg-slate-800/80 hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 border border-slate-700/80 hover:border-rose-500/40 flex items-center justify-center transition">
+                                    <i class="fa-solid fa-trash-can text-xs"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <h4 class="font-black text-sm text-white mb-1">${title}</h4>
+                        <p class="text-xs text-slate-300 font-medium mb-3">${desc}</p>
+                    </div>
+
+                    <button onclick="redeemPhysicalGift('${gift.id}', ${gift.cost}, '${title.replace(/'/g, "\\'")}', '${desc.replace(/'/g, "\\'")}')" class="w-full py-2 rounded-xl text-xs font-bold transition ${
+                        canAfford
+                        ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:opacity-95 text-white shadow-lg active:scale-95'
+                        : 'bg-slate-800 text-slate-500 hover:bg-slate-700'
+                    }">
+                        ${canAfford ? `${t.redeemGiftBtn} (-${gift.cost} ${t.ptsUnit})` : `${t.notEnoughPtsBtn} (${gift.cost - effortPoints} ${t.ptsUnit})`}
+                    </button>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function deletePhysicalGift(giftId) {
+            const t = i18n[currentLang];
+            if (giftId.startsWith('custom_')) {
+                customGifts = customGifts.filter(g => g.id !== giftId);
+                localStorage.setItem(STORAGE_KEY_CUSTOM_GIFTS, JSON.stringify(customGifts));
+            } else {
+                if (!hiddenDefaultGiftIds.includes(giftId)) {
+                    hiddenDefaultGiftIds.push(giftId);
+                    localStorage.setItem(STORAGE_KEY_HIDDEN_GIFTS, JSON.stringify(hiddenDefaultGiftIds));
+                }
+            }
+            showToast(t.toastGiftDeleted);
+            renderGiftShop();
+        }
+
+        function redeemPhysicalGift(giftId, cost, title, desc) {
+            const t = i18n[currentLang];
+            if (effortPoints < cost) {
+                showToast(t.toastNotEnoughPoints);
+                return;
+            }
+
+            effortPoints -= cost;
+            localStorage.setItem(STORAGE_KEY_POINTS, effortPoints);
+
+            const uniqueClaimId = `${giftId}_${Date.now()}`;
+            redeemedPhysicalGifts.push({
+                id: uniqueClaimId,
+                title: title,
+                desc: desc,
+                cost: cost
+            });
+            localStorage.setItem(STORAGE_KEY_REDEEMED_GIFTS, JSON.stringify(redeemedPhysicalGifts));
+
+            showToast(t.toastGiftExchanged);
+            claimCoupon(title, desc);
+            renderAll();
+        }
+
+        function addCustomGift(e) {
+            e.preventDefault();
+            const t = i18n[currentLang];
+            const nameInput = document.getElementById('customGiftName');
+            const costInput = document.getElementById('customGiftCost');
+            const nameVal = nameInput.value.trim();
+            const costVal = parseInt(costInput.value);
+
+            if (!nameVal || isNaN(costVal) || costVal <= 0) return;
+
+            customGifts.push({
+                id: 'custom_' + Date.now(),
+                cost: costVal,
+                icon: 'fa-gift',
+                titleEn: nameVal,
+                titleZh: nameVal,
+                descEn: `Custom physical gift added by Meowwww (${costVal} Pts).`,
+                descZh: `Meowwww 專屬新增實體禮物（需 ${costVal} 積分）。`
+            });
+
+            localStorage.setItem(STORAGE_KEY_CUSTOM_GIFTS, JSON.stringify(customGifts));
+            nameInput.value = '';
+            costInput.value = '';
+            showToast(t.toastCustomGiftAdded);
+            renderGiftShop();
+        }
+
+        function renderEarnedVault(currentWeight) {
+            const t = i18n[currentLang];
+            const container = document.getElementById('claimedVaultContainer');
+            container.innerHTML = '';
+
+            const unlockedItems = [];
+
+            // Gather unlocked weight rewards
+            weightMilestones.forEach(m => {
+                if (currentWeight <= m.weight) {
+                    unlockedItems.push({
+                        id: 'weight_' + m.weight,
+                        title: currentLang === 'zh' ? m.titleZh : m.titleEn,
+                        reward: currentLang === 'zh' ? m.rewardZh : m.rewardEn,
+                        desc: currentLang === 'zh' ? m.descZh : m.descEn,
+                        badge: `${m.weight} ${t.kgGoalSuffix}`,
+                        isPhysical: false
+                    });
+                }
+            });
+
+            // Gather unlocked streak rewards
+            streakMilestones.forEach(m => {
+                if (currentStreakDays >= m.days) {
+                    unlockedItems.push({
+                        id: 'streak_' + m.days,
+                        title: currentLang === 'zh' ? m.titleZh : m.titleEn,
+                        reward: currentLang === 'zh' ? m.rewardZh : m.rewardEn,
+                        desc: currentLang === 'zh' ? m.descZh : m.descEn,
+                        badge: `${m.days}${t.streakBadgeSuffix}`,
+                        isPhysical: false
+                    });
+                }
+            });
+
+            // Gather redeemed physical gifts
+            redeemedPhysicalGifts.forEach(g => {
+                unlockedItems.push({
+                    id: g.id,
+                    title: g.title,
+                    reward: g.desc,
+                    desc: g.desc,
+                    badge: `🎁 ${t.giftBadgeText} (${g.cost} ${t.ptsUnit})`,
+                    isPhysical: true
+                });
+            });
+
+            document.getElementById('earnedRewardsCount').innerText = `${unlockedItems.length} ${t.unlockedSuffix}`;
+
+            if (unlockedItems.length === 0) {
+                container.innerHTML = `
+                    <div class="p-4 text-center text-xs text-slate-500 italic rounded-2xl bg-slate-900/40 border border-slate-800">
+                        ${t.noPrivilegesMsg}
+                    </div>
+                `;
+                return;
+            }
+
+            unlockedItems.forEach(item => {
+                const isUsed = !!usedRewardsMap[item.id];
+                const card = document.createElement('div');
+                card.className = `p-3.5 rounded-2xl border transition flex items-start justify-between gap-3 ${
+                    isUsed 
+                    ? 'bg-slate-900/30 border-slate-800/80 opacity-60' 
+                    : item.isPhysical
+                        ? 'bg-gradient-to-r from-purple-500/15 to-pink-500/15 border-purple-500/40 shadow-sm'
+                        : 'bg-gradient-to-r from-amber-500/10 to-rose-500/10 border-amber-500/30 shadow-sm'
+                }`;
+
+                card.innerHTML = `
+                    <div class="space-y-1 flex-1">
+                        <div class="flex flex-wrap items-center gap-1.5">
+                            <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${
+                                isUsed 
+                                ? 'bg-slate-800 text-slate-400' 
+                                : item.isPhysical 
+                                    ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                                    : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                            }">
+                                ${item.badge}
+                            </span>
+                            ${isUsed ? `<span class="text-[10px] font-black text-emerald-400 bg-emerald-500/20 px-2 py-0.5 rounded-full border border-emerald-500/30"><i class="fa-solid fa-check mr-0.5"></i> ${t.usedBadge}</span>` : ''}
+                        </div>
+                        <h5 class="text-xs sm:text-sm font-bold ${isUsed ? 'line-through text-slate-400' : 'text-white'}">${item.title}</h5>
+                        <p class="text-xs text-slate-300 font-medium">${item.reward}</p>
+                    </div>
+
+                    <button onclick="toggleRewardUsed('${item.id}')" class="px-3 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-1.5 shrink-0 ${
+                        isUsed 
+                        ? 'bg-slate-800 text-slate-400 hover:text-white' 
+                        : 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-md shadow-emerald-500/20 active:scale-95'
+                    }">
+                        <i class="fa-solid ${isUsed ? 'fa-rotate-left' : 'fa-check'}"></i>
+                        <span>${isUsed ? t.undoBtn : t.useBtn}</span>
+                    </button>
+                `;
+
+                container.appendChild(card);
+            });
+        }
+
+        function toggleRewardUsed(id) {
+            const t = i18n[currentLang];
+            usedRewardsMap[id] = !usedRewardsMap[id];
+            localStorage.setItem(STORAGE_KEY_REDEEMED, JSON.stringify(usedRewardsMap));
+
+            if (usedRewardsMap[id]) {
+                showToast(t.toastRewardUsed);
+                confetti({ particleCount: 50, spread: 50, origin: { y: 0.7 } });
+            } else {
+                showToast(t.toastRewardReset);
+            }
+
+            const latestWeight = weightEntries.length > 0 ? weightEntries[weightEntries.length - 1].weight : STARTING_WEIGHT;
+            renderEarnedVault(latestWeight);
+        }
+
+        function claimCoupon(title, desc) {
+            confetti({
+                particleCount: 150,
+                spread: 90,
+                origin: { y: 0.5 }
+            });
+
+            document.getElementById('modalRewardTitle').innerText = title;
+            document.getElementById('modalRewardDesc').innerText = desc;
+            
+            const modal = document.getElementById('rewardModal');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+            }, 10);
+        }
+
+        function closeRewardModal() {
+            const modal = document.getElementById('rewardModal');
+            modal.classList.add('opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        function newQuote() {
+            const quotesList = i18n[currentLang].quotes;
+            const randomIndex = Math.floor(Math.random() * quotesList.length);
+            const q = quotesList[randomIndex];
+            document.getElementById('quoteText').innerText = `"${q.text}"`;
+            document.getElementById('quoteAuthor').innerText = `— ${q.author}`;
+        }
+
+        function saveFanNote() {
+            const t = i18n[currentLang];
+            const text = document.getElementById('fanNoteInput').value.trim();
+            if (text) {
+                localStorage.setItem(STORAGE_KEY_NOTE, text);
+                document.getElementById('fanNoteDisplay').innerText = `"${text}"`;
+                document.getElementById('fanNoteInput').value = '';
+                showToast(t.toastNoteSaved);
+            }
+        }
+
+        function triggerCheerAnimation() {
+            const t = i18n[currentLang];
+            confetti({
+                particleCount: 120,
+                spread: 100,
+                origin: { y: 0.4 },
+                colors: ['#f43f5e', '#ec4899', '#10b981', '#f59e0b']
+            });
+
+            showToast(t.toastCheerSent);
+        }
+
+        function resetToInitialState() {
+            const t = i18n[currentLang];
+            const keysToClear = [
+                STORAGE_KEY_WEIGHTS,
+                STORAGE_KEY_GOAL,
+                STORAGE_KEY_HABITS,
+                STORAGE_KEY_STREAK,
+                STORAGE_KEY_CHECKIN_DATE,
+                STORAGE_KEY_POINTS,
+                STORAGE_KEY_CUSTOM_GIFTS,
+                STORAGE_KEY_HIDDEN_GIFTS,
+                STORAGE_KEY_REDEEMED_GIFTS,
+                STORAGE_KEY_NOTE,
+                STORAGE_KEY_REDEEMED
+            ];
+            keysToClear.forEach(k => localStorage.removeItem(k));
+
+            targetGoal = 80.0;
+            currentStreakDays = 0;
+            lastCheckInDate = '';
+            effortPoints = 0;
+            usedRewardsMap = {};
+            redeemedPhysicalGifts = [];
+            customGifts = [];
+            hiddenDefaultGiftIds = [];
+            weightEntries = [{ date: getTodayISO(), weight: 100.0 }];
+            habits = initialHabits.map(h => ({ ...h, completed: false }));
+
+            document.getElementById('targetGoalInput').value = targetGoal;
+            document.getElementById('entryDate').value = getTodayISO();
+
+            applyLanguageTexts();
+            renderAll();
+            showToast(t.toastFullReset);
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMessage').innerText = message;
+            
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
